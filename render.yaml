@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: jarvis
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: APP_NAME
+        value: Jarvis
+      - key: DEBUG
+        value: false
