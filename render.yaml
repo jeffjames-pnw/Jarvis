@@ -10,3 +10,15 @@ services:
         value: Jarvis
       - key: DEBUG
         value: false
+      - key: MODEL_NAME
+        value: claude-haiku-4-5-20251001
+      - key: CHROMA_PATH
+        value: ./chroma_data
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: LANGSMITH_API_KEY
+        sync: false
+      - key: LANGSMITH_TRACING
+        value: true
+      - key: LANGSMITH_PROJECT
+        value: jarvis
