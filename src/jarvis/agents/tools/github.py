@@ -93,6 +93,6 @@ def get_my_activity() -> str:
             {"type": e.type, "repo": e.repo.name, "created_at": e.created_at.isoformat()}
             for e in own_events
         ]
-        return json.dumps(results, indent=2) if results else "No recent activity found in your own repositories."
+        return json.dumps(results, indent=2) if results else "No recent activity found in your repositories."
     except Exception as e:
         return f"GitHub error: {e}"
