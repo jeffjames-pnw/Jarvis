@@ -87,10 +87,13 @@ def get_my_activity() -> str:
     try:
         g = _client()
         user = g.get_user()
-        events = list(user.get_events()[:20])
+        own_events = [
+            e for e in user.get_events()
+            if e.repo.name.split("/")[0] == user.login
+        ][:20]
         results = [
             {"type": e.type, "repo": e.repo.name, "created_at": e.created_at.isoformat()}
-            for e in events
+            for e in own_events
         ]
         return json.dumps(results, indent=2) if results else "No recent activity found."
     except GithubException as e:
