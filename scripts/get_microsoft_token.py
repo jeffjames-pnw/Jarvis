@@ -18,7 +18,7 @@ import msal
 
 client_id = input("Paste your Azure AD Application (client) ID: ").strip()
 authority = "https://login.microsoftonline.com/common"
-scopes = ["Notes.Read", "offline_access"]
+scopes = ["Notes.Read"]  # offline_access is reserved and handled by MSAL automatically
 
 app = msal.PublicClientApplication(client_id, authority=authority)
 flow = app.initiate_device_flow(scopes=scopes)

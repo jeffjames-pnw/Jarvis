@@ -11,7 +11,7 @@ from jarvis.memory.chroma import get_chroma_client
 logger = logging.getLogger(__name__)
 
 _AUTHORITY = "https://login.microsoftonline.com/common"
-_SCOPES = ["https://graph.microsoft.com/Notes.Read"]
+_SCOPES = ["https://graph.microsoft.com/Notes.Read"]  # offline_access handled by MSAL internally
 _GRAPH_BASE = "https://graph.microsoft.com/v1.0/me/onenote"
 _COLLECTION = "notes"
 _CHUNK_SIZE = 800  # characters per ChromaDB document
