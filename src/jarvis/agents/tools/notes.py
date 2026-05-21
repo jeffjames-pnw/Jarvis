@@ -29,7 +29,9 @@ def search_notes(query: str) -> str:
             return "No relevant notes found."
         passages = []
         for doc, meta in zip(docs, metas):
-            source = meta.get("title", meta.get("source", "unknown"))
+            title = meta.get("title", "unknown")
+            section = meta.get("section", "")
+            source = f"{section} / {title}" if section else title
             passages.append(f"[{source}]\n{doc}")
         return "\n\n---\n\n".join(passages)
     except Exception as e:

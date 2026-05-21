@@ -31,18 +31,36 @@ def _get_access_token() -> str:
     return result["access_token"]
 
 
-def _fetch_pages(token: str) -> list[dict[str, Any]]:
-    headers = {"Authorization": f"Bearer {token}"}
-    pages = []
-    url = f"{_GRAPH_BASE}/pages?$select=id,title&$top=100"
+def _graph_get(url: str, headers: dict) -> list[dict[str, Any]]:
+    """Paginate through a Graph API collection, returning all items."""
+    items = []
     while url:
         resp = httpx.get(url, headers=headers, timeout=30)
         if not resp.is_success:
             logger.error("Graph API error %s: %s", resp.status_code, resp.text)
             resp.raise_for_status()
         data = resp.json()
-        pages.extend(data.get("value", []))
+        items.extend(data.get("value", []))
         url = data.get("@odata.nextLink")
+    return items
+
+
+def _fetch_pages(token: str) -> list[dict[str, Any]]:
+    # Microsoft recommends fetching pages per section for accounts with many sections
+    headers = {"Authorization": f"Bearer {token}"}
+    sections = _graph_get(
+        f"{_GRAPH_BASE}/sections?$select=id,displayName&$top=100", headers
+    )
+    logger.info("found %d OneNote sections", len(sections))
+    pages = []
+    for section in sections:
+        section_pages = _graph_get(
+            f"{_GRAPH_BASE}/sections/{section['id']}/pages?$select=id,title&$top=100",
+            headers,
+        )
+        for page in section_pages:
+            page["section"] = section.get("displayName", "")
+        pages.extend(section_pages)
     return pages
 
 
@@ -90,7 +108,11 @@ def ingest_all_pages() -> dict[str, int]:
 
         chunks = _chunk(content)
         ids = [f"{page_id}_{i}" for i in range(len(chunks))]
-        metas = [{"title": title, "page_id": page_id, "chunk": i} for i in range(len(chunks))]
+        section = page.get("section", "")
+        metas = [
+            {"title": title, "section": section, "page_id": page_id, "chunk": i}
+            for i in range(len(chunks))
+        ]
         collection.upsert(documents=chunks, ids=ids, metadatas=metas)
         added += len(chunks)
 
