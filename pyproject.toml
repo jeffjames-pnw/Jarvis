@@ -10,6 +10,9 @@ dependencies = [
     "langchain-anthropic>=0.3.0",
     "chromadb>=0.5.0",
     "langchain-chroma>=0.1.0",
+    "PyGithub>=2.3.0",
+    "msal>=1.28.0",
+    "beautifulsoup4>=4.12.0",
 ]
 
 [project.optional-dependencies]
@@ -30,6 +33,7 @@ packages = ["src/jarvis"]
 [tool.ruff]
 line-length = 100
 target-version = "py312"
+exclude = ["scripts/"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP"]
@@ -37,3 +41,7 @@ select = ["E", "F", "I", "UP"]
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+filterwarnings = [
+    "ignore:.*iscoroutinefunction.*deprecated",
+    "ignore:create_react_agent has been moved",
+]

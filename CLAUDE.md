@@ -82,14 +82,14 @@ git push origin main        # triggers CI + Render auto-deploy
 ## Current state — Phase 2 complete
 - [x] Phase 1: FastAPI hello world, Docker, CI/CD, Render deployment, structured access logging
 - [x] Phase 2: POST /chat backed by single-node LangGraph graph calling Claude via langchain-anthropic; ChromaDB wired up; LangSmith tracing enabled
-- [ ] Phase 3: Real agents (TBD — see below)
+- [x] Phase 3: Personal assistant — GitHub tools + OneNote ingestion into ChromaDB + ReAct agent
+- [ ] Phase 4: Email (Gmail OAuth), conversation memory, scheduling
 
-## Phase 3 — next decision
-Choose one agent use case to build first:
-1. **Personal assistant** — over email, notes, and GitHub (personal productivity)
-2. **Alomac assistant** — business assistant for the Alomac side-gig
+## Phase 3 — what was built
+**Graph:** `create_react_agent` with 5 tools. Claude decides which to call based on the question.
+**Tools:** `list_my_issues`, `list_my_prs`, `search_code`, `get_my_activity` (GitHub live API), `search_notes` (ChromaDB semantic search)
+**Ingestion:** `POST /ingest/notes` pulls all OneNote pages via Microsoft Graph API, chunks them, upserts into ChromaDB collection "notes"
+**OAuth setup:** Run `uv run python scripts/get_microsoft_token.py` once locally to get MICROSOFT_REFRESH_TOKEN
 
-Phase 3 will add: a retrieval node before call_model (ChromaDB in the graph),
-document ingestion pipeline, and likely a second specialized graph.
-The graph will grow from `START → call_model → END` to at minimum
-`START → retrieve_context → call_model → END`.
+## Secrets required in Render dashboard
+ANTHROPIC_API_KEY, LANGSMITH_API_KEY, GITHUB_TOKEN, MICROSOFT_CLIENT_ID, MICROSOFT_REFRESH_TOKEN

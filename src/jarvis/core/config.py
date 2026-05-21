@@ -7,11 +7,18 @@ class Settings(BaseSettings):
     app_name: str = "Jarvis"
     debug: bool = False
 
-    # LLM
-    model_name: str = "claude-haiku-4-5-20251001"
+    # LLM — bump to sonnet for tool-calling reliability
+    model_name: str = "claude-sonnet-4-6"
 
     # ChromaDB — embedded persistent client; set path via env var
     chroma_path: str = "./chroma_data"
+
+    # GitHub
+    github_token: str = ""
+
+    # Microsoft (OneNote via Graph API)
+    microsoft_client_id: str = ""
+    microsoft_refresh_token: str = ""
 
 
 settings = Settings()

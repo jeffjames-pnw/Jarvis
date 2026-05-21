@@ -11,10 +11,16 @@ services:
       - key: DEBUG
         value: false
       - key: MODEL_NAME
-        value: claude-haiku-4-5-20251001
+        value: claude-sonnet-4-6
       - key: CHROMA_PATH
         value: ./chroma_data
       - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: GITHUB_TOKEN
+        sync: false
+      - key: MICROSOFT_CLIENT_ID
+        sync: false
+      - key: MICROSOFT_REFRESH_TOKEN
         sync: false
       - key: LANGSMITH_API_KEY
         sync: false
