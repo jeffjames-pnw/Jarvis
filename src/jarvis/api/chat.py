@@ -18,7 +18,8 @@ class ChatResponse(BaseModel):
 
 @router.post("", response_model=ChatResponse)
 async def chat(request: ChatRequest) -> ChatResponse:
-    # this runs the graph initialized above
-    # loading the llm within the call_model in nodes.py
     result = await graph.ainvoke({"messages": [HumanMessage(content=request.message)]})
-    return ChatResponse(reply=result["messages"][-1].content)
+    content = result["messages"][-1].content
+    if isinstance(content, list):
+        content = "".join(block.get("text", "") for block in content if isinstance(block, dict))
+    return ChatResponse(reply=content)

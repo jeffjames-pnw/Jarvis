@@ -1,7 +1,7 @@
 import json
 import logging
 
-from github import Github, GithubException
+from github import Github
 from langchain_core.tools import tool
 
 from jarvis.core.config import settings
@@ -30,7 +30,7 @@ def list_my_issues() -> str:
             for i in list(issues[:20])
         ]
         return json.dumps(results, indent=2) if results else "No open issues assigned to you."
-    except GithubException as e:
+    except Exception as e:
         return f"GitHub error: {e}"
 
 
@@ -53,7 +53,7 @@ def list_my_prs() -> str:
             ],
         }
         return json.dumps(results, indent=2)
-    except GithubException as e:
+    except Exception as e:
         return f"GitHub error: {e}"
 
 
@@ -77,7 +77,7 @@ def search_code(query: str, repo: str = "") -> str:
             for r in list(results_raw[:10])
         ]
         return json.dumps(results, indent=2) if results else "No matching code found."
-    except GithubException as e:
+    except Exception as e:
         return f"GitHub error: {e}"
 
 
@@ -87,14 +87,12 @@ def get_my_activity() -> str:
     try:
         g = _client()
         user = g.get_user()
-        own_events = [
-            e for e in user.get_events()
-            if e.repo.name.split("/")[0] == user.login
-        ][:20]
+        first_page = user.get_events().get_page(0)
+        own_events = [e for e in first_page if e.repo.name.split("/")[0] == user.login][:20]
         results = [
             {"type": e.type, "repo": e.repo.name, "created_at": e.created_at.isoformat()}
             for e in own_events
         ]
-        return json.dumps(results, indent=2) if results else "No recent activity found."
-    except GithubException as e:
+        return json.dumps(results, indent=2) if results else "No recent activity found in your own repositories."
+    except Exception as e:
         return f"GitHub error: {e}"
