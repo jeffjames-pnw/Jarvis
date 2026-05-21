@@ -34,7 +34,7 @@ def _get_access_token() -> str:
 def _fetch_pages(token: str) -> list[dict[str, Any]]:
     headers = {"Authorization": f"Bearer {token}"}
     pages = []
-    url = f"{_GRAPH_BASE}/pages?$select=id,title,parentSection&$top=100"
+    url = f"{_GRAPH_BASE}/pages?$select=id,title&$top=100"
     while url:
         resp = httpx.get(url, headers=headers, timeout=30)
         resp.raise_for_status()
