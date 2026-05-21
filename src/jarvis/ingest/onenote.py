@@ -136,6 +136,9 @@ def ingest_all_pages() -> dict[str, int]:
             continue
 
         chunks = _chunk(content)
+        if not chunks:
+            logger.debug("skipping empty page %s (%s)", page_id, title)
+            continue
         ids = [f"{page_id}_{i}" for i in range(len(chunks))]
         section = page.get("section", "")
         metas = [
