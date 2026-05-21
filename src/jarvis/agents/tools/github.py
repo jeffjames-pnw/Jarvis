@@ -88,7 +88,9 @@ def get_my_activity() -> str:
         g = _client()
         user = g.get_user()
         first_page = user.get_events().get_page(0)
-        own_events = [e for e in first_page if e.repo.name.split("/")[0] == user.login][:20]
+        own_events = [
+            e for e in first_page if e.repo.name.split("/")[0] == user.login
+        ][:20]
         results = [
             {"type": e.type, "repo": e.repo.name, "created_at": e.created_at.isoformat()}
             for e in own_events
