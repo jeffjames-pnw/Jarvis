@@ -22,6 +22,12 @@ services:
         sync: false
       - key: MICROSOFT_REFRESH_TOKEN
         sync: false
+      - key: ONENOTE_NOTEBOOK
+        value: Personal
+      - key: ONENOTE_SECTIONS
+        value: '["Coding 2026"]'
+      - key: API_KEY
+        sync: false
       - key: LANGSMITH_API_KEY
         sync: false
       - key: LANGSMITH_TRACING

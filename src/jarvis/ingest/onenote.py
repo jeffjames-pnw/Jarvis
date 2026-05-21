@@ -45,13 +45,42 @@ def _graph_get(url: str, headers: dict) -> list[dict[str, Any]]:
     return items
 
 
-def _fetch_pages(token: str) -> list[dict[str, Any]]:
-    # Microsoft recommends fetching pages per section for accounts with many sections
+def _fetch_sections(token: str) -> list[dict[str, Any]]:
+    """Return sections, filtered by settings.onenote_notebook and onenote_sections if set."""
     headers = {"Authorization": f"Bearer {token}"}
-    sections = _graph_get(
-        f"{_GRAPH_BASE}/sections?$select=id,displayName&$top=100", headers
-    )
-    logger.info("found %d OneNote sections", len(sections))
+
+    if settings.onenote_notebook:
+        notebooks = _graph_get(
+            f"{_GRAPH_BASE}/notebooks?$select=id,displayName&$top=100", headers
+        )
+        notebook = next(
+            (n for n in notebooks if n["displayName"] == settings.onenote_notebook), None
+        )
+        if not notebook:
+            names = [n["displayName"] for n in notebooks]
+            raise RuntimeError(
+                f"Notebook '{settings.onenote_notebook}' not found. Available: {names}"
+            )
+        sections = _graph_get(
+            f"{_GRAPH_BASE}/notebooks/{notebook['id']}/sections?$select=id,displayName&$top=100",
+            headers,
+        )
+    else:
+        sections = _graph_get(
+            f"{_GRAPH_BASE}/sections?$select=id,displayName&$top=100", headers
+        )
+
+    if settings.onenote_sections:
+        sections = [s for s in sections if s["displayName"] in settings.onenote_sections]
+        logger.info("scoped to sections: %s", [s["displayName"] for s in sections])
+
+    return sections
+
+
+def _fetch_pages(token: str) -> list[dict[str, Any]]:
+    headers = {"Authorization": f"Bearer {token}"}
+    sections = _fetch_sections(token)
+    logger.info("ingesting %d OneNote section(s)", len(sections))
     pages = []
     for section in sections:
         section_pages = _graph_get(

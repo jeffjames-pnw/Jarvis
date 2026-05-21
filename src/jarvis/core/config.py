@@ -19,6 +19,11 @@ class Settings(BaseSettings):
     # Microsoft (OneNote via Graph API)
     microsoft_client_id: str = ""
     microsoft_refresh_token: str = ""
+    onenote_notebook: str = ""   # filter ingestion to this notebook name (empty = all)
+    onenote_sections: list[str] = []  # filter to these section names (empty = all)
+
+    # API key — required on all sensitive endpoints (/chat, /ingest)
+    api_key: str = ""
 
 
 settings = Settings()

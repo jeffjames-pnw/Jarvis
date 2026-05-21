@@ -1,12 +1,13 @@
 import logging
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
+from jarvis.core.auth import require_api_key
 from jarvis.ingest.onenote import ingest_all_pages
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/ingest", tags=["ingest"])
+router = APIRouter(prefix="/ingest", tags=["ingest"], dependencies=[Depends(require_api_key)])
 
 
 @router.post("/notes")

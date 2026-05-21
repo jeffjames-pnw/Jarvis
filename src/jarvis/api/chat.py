@@ -1,14 +1,11 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from langchain_core.messages import HumanMessage
 from pydantic import BaseModel
 
-# this loads agents/graph.py
-# which imports call_model from agents/nodes.py
-# and builds the state graph
-# at startup time to initialize ahead of call time
 from jarvis.agents.graph import graph
+from jarvis.core.auth import require_api_key
 
-router = APIRouter(prefix="/chat", tags=["chat"])
+router = APIRouter(prefix="/chat", tags=["chat"], dependencies=[Depends(require_api_key)])
 
 
 class ChatRequest(BaseModel):
