@@ -11,7 +11,7 @@ from jarvis.memory.chroma import get_chroma_client
 logger = logging.getLogger(__name__)
 
 _AUTHORITY = "https://login.microsoftonline.com/common"
-_SCOPES = ["https://graph.microsoft.com/Notes.Read"]  # offline_access handled by MSAL internally
+_SCOPES = ["Notes.Read"]  # match scope format used during device flow; offline_access reserved
 _GRAPH_BASE = "https://graph.microsoft.com/v1.0/me/onenote"
 _COLLECTION = "notes"
 _CHUNK_SIZE = 800  # characters per ChromaDB document
@@ -37,7 +37,9 @@ def _fetch_pages(token: str) -> list[dict[str, Any]]:
     url = f"{_GRAPH_BASE}/pages?$select=id,title&$top=100"
     while url:
         resp = httpx.get(url, headers=headers, timeout=30)
-        resp.raise_for_status()
+        if not resp.is_success:
+            logger.error("Graph API error %s: %s", resp.status_code, resp.text)
+            resp.raise_for_status()
         data = resp.json()
         pages.extend(data.get("value", []))
         url = data.get("@odata.nextLink")
