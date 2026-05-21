@@ -83,18 +83,24 @@ def search_code(query: str, repo: str = "") -> str:
 
 @tool
 def get_my_activity() -> str:
-    """Get my recent GitHub activity — commits, PRs opened, issues commented on."""
+    """Get my recent commits across my own GitHub repositories."""
     try:
         g = _client()
         user = g.get_user()
-        first_page = user.get_events().get_page(0)
-        own_events = [
-            e for e in first_page if e.repo.name.split("/")[0] == user.login
-        ][:20]
-        results = [
-            {"type": e.type, "repo": e.repo.name, "created_at": e.created_at.isoformat()}
-            for e in own_events
-        ]
+        repos = list(user.get_repos(sort="updated", direction="desc")[:5])
+        results = []
+        for repo in repos:
+            if repo.owner.login != user.login:
+                continue
+            try:
+                for commit in repo.get_commits(author=user.login)[:3]:
+                    results.append({
+                        "repo": repo.full_name,
+                        "message": commit.commit.message.split("\n")[0],
+                        "date": commit.commit.author.date.isoformat(),
+                    })
+            except Exception:
+                continue
         return json.dumps(results, indent=2) if results else "No recent activity found."
     except Exception as e:
         return f"GitHub error: {e}"
