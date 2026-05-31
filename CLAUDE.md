@@ -93,3 +93,8 @@ git push origin main        # triggers CI + Render auto-deploy
 
 ## Secrets required in Render dashboard
 ANTHROPIC_API_KEY, LANGSMITH_API_KEY, GITHUB_TOKEN, MICROSOFT_CLIENT_ID, MICROSOFT_REFRESH_TOKEN
+
+<!-- SPECKIT START -->
+For additional context about technologies to be used, project structure,
+shell commands, and other important information, read the current plan
+<!-- SPECKIT END -->
