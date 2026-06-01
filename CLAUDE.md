@@ -97,4 +97,5 @@ ANTHROPIC_API_KEY, LANGSMITH_API_KEY, GITHUB_TOKEN, MICROSOFT_CLIENT_ID, MICROSO
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan
+at specs/001-knowledge-model/plan.md
 <!-- SPECKIT END -->

@@ -128,22 +128,25 @@ report generator can produce an EvidenceRef for each claim without additional lo
 
 - **FR-001**: The system MUST define a SourceItem entity as the canonical normalized record for any
   ingested document, event, or page, with the following required fields: source_type, source_name,
-  canonical_id, source_url, body_text, created_at, updated_at, privacy_label, project,
-  processing_status, and deleted_at (nullable; null means active).
-- **FR-001c**: When a source record is deleted at its origin, the corresponding SourceItem MUST be
-  soft-deleted by setting `deleted_at` to the deletion timestamp. Soft-deleted records MUST be
-  excluded from all retrieval queries by default. Callers MAY explicitly request soft-deleted
-  records for audit or historical report purposes. SourceChunks of soft-deleted SourceItems MUST
-  also be excluded from retrieval by default.
+  canonical_id, source_url, body_text, retrieval_text, created_at, updated_at, privacy_label,
+  project, processing_status, and deleted_at (nullable; null means active). The entity MUST also
+  define an optional metadata field (dict or None) for source-specific supplementary data such as
+  email sender, calendar attendees, or GitHub labels that do not map to a dedicated top-level field.
+- **FR-001a**: When a SourceItem with a matching `canonical_id` is ingested a second time, the
+  system MUST upsert: update all changed fields in the existing record rather than creating a
+  duplicate. The `canonical_id` and `created_at` fields MUST be preserved; `updated_at` MUST
+  reflect the re-ingestion time. `processing_status` MUST reset to PENDING. Associated SourceChunks
+  MUST be replaced to reflect updated content.
 - **FR-001b**: The system MUST define a `processing_status` enumeration for SourceItem with values:
   PENDING (ingested, not yet chunked), CHUNKED (chunks created, not yet embedded), EMBEDDED (chunks
   have embeddings and are searchable), and FAILED (an error occurred at any pipeline stage). The
   initial status on first ingestion MUST be PENDING. The system MUST surface FAILED records so
   that operators can identify incomplete ingestion without scanning raw logs.
-- **FR-001a**: When a SourceItem with a matching `canonical_id` is ingested a second time, the
-  system MUST upsert: update all changed fields in the existing record rather than creating a
-  duplicate. The `canonical_id` and `created_at` fields MUST be preserved; `updated_at` MUST
-  reflect the re-ingestion time. Associated SourceChunks MUST be replaced to reflect updated content.
+- **FR-001c**: When a source record is deleted at its origin, the corresponding SourceItem MUST be
+  soft-deleted by setting `deleted_at` to the deletion timestamp. Soft-deleted records MUST be
+  excluded from all retrieval queries by default. Callers MAY explicitly request soft-deleted
+  records for audit or historical report purposes. SourceChunks of soft-deleted SourceItems MUST
+  also be excluded from retrieval by default.
 - **FR-002**: The system MUST define a SourceChunk entity representing a text slice of a SourceItem,
   with required fields: chunk_id, parent_id (references SourceItem.canonical_id), chunk_index,
   chunk_text, char_count, and embedding (nullable until embedded).
@@ -173,8 +176,9 @@ report generator can produce an EvidenceRef for each claim without additional lo
   SourceItem with all required fields populated.
 - **FR-011**: SpecKit artifacts (spec.md, plan.md, tasks.md, constitution.md) MUST be mappable to a
   SourceItem with all required fields populated.
-- **FR-012**: SourceItem MUST include an optional summary field for a human-readable one-paragraph
-  description, populated during ingestion or by the LLM.
+- **FR-012**: SourceItem MUST define a summary field (nullable). The field MAY be left unpopulated
+  at ingestion time; it is populated during ingestion or by the LLM when a human-readable
+  one-paragraph description of the record is available.
 - **FR-013**: SourceItem MUST include a retrieval_text field containing normalized, embedding-ready
   text derived from body_text (stripped of markup, code blocks, etc.) used for chunking and search.
 - **FR-014**: SourceItem MUST include an optional project field for repository or project name,
@@ -186,10 +190,11 @@ report generator can produce an EvidenceRef for each claim without additional lo
 
 - **SourceItem**: The canonical normalized record for any ingested external document, event, or page.
   Represents one logical unit of content: a GitHub issue, an email, a calendar event, a note page,
-  or a spec file. Contains full provenance (source_url, source_type, canonical_id), body content,
-  timestamps, project association, privacy label, optional summary, processing_status tracking
-  pipeline progress through PENDING → CHUNKED → EMBEDDED (or FAILED on error), and deleted_at
-  for soft deletion (null means active; non-null means excluded from retrieval by default).
+  or a spec file. Contains full provenance (source_url, source_type, canonical_id), body content
+  (body_text), normalized retrieval content (retrieval_text), timestamps, project association,
+  privacy label, optional summary, optional metadata dict for source-specific supplementary fields,
+  processing_status tracking pipeline progress through PENDING → CHUNKED → EMBEDDED (or FAILED),
+  and deleted_at for soft deletion (null means active; non-null means excluded from retrieval).
 - **SourceChunk**: A sub-section of a SourceItem produced during ingestion for embedding and
   retrieval. Contains the chunk text, its character count (char_count), its position within the
   parent (chunk_index), and a reference back to the parent SourceItem via parent_id. Default target
@@ -232,8 +237,9 @@ report generator can produce an EvidenceRef for each claim without additional lo
 - The model is defined as pure data contracts, not tied to any specific storage backend; the
   persistence layer implements the model separately and is out of scope for this feature.
 - Outlook and Gmail email are treated as the same EMAIL source_type; Calendar events from either
-  provider map to CALENDAR. Source-specific metadata (e.g., sender) lives in an optional
-  metadata dict rather than requiring separate types.
+  provider map to CALENDAR. Source-specific supplementary data (e.g., sender, recipients,
+  attendees, labels) lives in the optional SourceItem `metadata` dict field (defined in FR-001)
+  rather than requiring separate source-type-specific entity types.
 - body_text may contain raw markup (HTML, Markdown); retrieval_text is the cleaned version. Both
   are stored; only retrieval_text is used for chunking and embedding.
 - SpecKit artifacts are identified by their file path within the repository; the canonical_id
