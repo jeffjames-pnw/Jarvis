@@ -79,10 +79,11 @@ uv run ruff check .         # lint
 git push origin main        # triggers CI + Render auto-deploy
 ```
 
-## Current state — Phase 2 complete
+## Current state — Phase 3 complete + Knowledge Model Foundation
 - [x] Phase 1: FastAPI hello world, Docker, CI/CD, Render deployment, structured access logging
 - [x] Phase 2: POST /chat backed by single-node LangGraph graph calling Claude via langchain-anthropic; ChromaDB wired up; LangSmith tracing enabled
 - [x] Phase 3: Personal assistant — GitHub tools + OneNote ingestion into ChromaDB + ReAct agent
+- [x] Knowledge Model Foundation: `src/jarvis/models/` — SourceItem, SourceChunk, RetrievalResult, EvidenceRef; 39 tests; all 5 source types mapped
 - [ ] Phase 4: Email (Gmail OAuth), conversation memory, scheduling
 
 ## Phase 3 — what was built
